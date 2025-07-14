@@ -1,0 +1,105 @@
+﻿@using blazor_multi_tab_ui.Components.MDI.Tabs
+@using blazor_multi_tab_ui.Models
+@using blazor_multi_tab_ui.Services
+
+@inject MdiStateService stateService
+
+<div style="height: 80vh;">
+    @if (tabsState is not null && tabsState.Tabs is not null && tabsState.Tabs.Count(t => t.Visible) > 0)
+    {
+        var tabsCollection = tabsState.Tabs;
+        var activeTabIndex = tabsState.ActiveTabIndex;
+
+            <DxTabs @ref="tabsRef"
+                    ActiveTabIndex=activeTabIndex
+                    ActiveTabIndexChanged="OnActiveTabIndexChanged"
+                    AllowTabReorder="true"
+                    TabReordering="OnTabReordering"
+                    TabClosing="OnTabClosing"
+                    RenderMode="TabsRenderMode.Default">
+                @for (int i = 0; i < tabsCollection.Count; i++)
+                {
+                    var tabModel = tabsCollection[i];
+                    <DxTabPage AllowClose="true"
+                               CssClass="@TabCssClass"
+                               VisibleIndex="@tabModel.VisibleIndex"
+                               Visible="@tabModel.Visible"
+                               Text="@tabModel.Text">
+                        <ChildContent>
+                            @if (stateService.TryGetType(tabModel.TabTypeName, out var type))
+                            {
+                                <DynamicComponent @key="@tabModel.Id" Type="type" Parameters="tabModel.Parameters" />
+                            }
+                            else
+                            {
+                                <DynamicComponent @key="@tabModel.Id" Type="@typeof(Unknown)" />
+                            }
+
+                        </ChildContent>
+                    </DxTabPage>
+                }
+            </DxTabs>
+
+        <TabsContextMenu @ref="contextMenu"
+        TabSelector=@($".{TabCssClass}") />
+    }
+</div>
+<DxButton Text="Open Customers Table" Click="ShowDefaultTabs"></DxButton>
+<DxButton Text="Open Customers Chart" Click="ShowSales"></DxButton>
+@if (tabsState is not null && tabsState.Tabs is not null && tabsState.Tabs.Count(t => !t.Visible) > 0)
+{
+    <DxButton Text="@($"Show Hidden Tabs({tabsState?.Tabs?.Count(t=> !t.Visible)})")" Click="@(() => stateService.SetAllTabsVisible(true))"></DxButton>
+}
+
+@code {
+    DxTabs? tabsRef;
+    TabsContextMenu? contextMenu;
+    MdiStateModel? tabsState;
+    string TabCssClass = "tab-with-context-menu";
+
+    async Task ShowSales()
+    {
+        await stateService.AddTab($"Sales Chart", nameof(Chart));
+    }
+    async Task ShowDefaultTabs()
+    {
+        await stateService.AddTab($"Customers", nameof(Customers));
+    }
+
+    protected async override Task OnInitializedAsync()
+    {
+        stateService.OnTabsChanged += Redraw;
+        tabsState = await stateService.LoadState();
+        await base.OnInitializedAsync();
+    }
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        await stateService.SaveState();
+        await base.OnAfterRenderAsync(firstRender);    
+    }
+
+    private void OnTabClosing(TabCloseEventArgs e)
+    {
+        if (tabsState is null) return;
+        stateService.SetTabVisible(e.TabInfo.VisibleIndex, false);
+    }
+
+    private void OnTabReordering(TabReorderEventArgs e)
+    {
+
+        if (tabsState is null) return;
+        stateService.ReorderTabs(e.FromTabInfo.VisibleIndex, e.ToTabInfo.VisibleIndex);
+    }
+
+    private async Task OnActiveTabIndexChanged(int newIndex)
+    {
+        await stateService.SetActiveTabIndex(newIndex);
+    }
+
+    async void Redraw()
+    {
+        await InvokeAsync(StateHasChanged);
+        if (contextMenu is null) return;
+        await contextMenu.AddContextMenuHandler();
+    }
+}

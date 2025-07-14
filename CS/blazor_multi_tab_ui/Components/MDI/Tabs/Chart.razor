@@ -1,0 +1,60 @@
+﻿@using blazor_multi_tab_ui.Models
+@using blazor_multi_tab_ui.Services
+@inject DataService dataService
+@inject MdiStateService stateService
+
+
+<div style="display: flex; flex-direction: row; margin-top: 50px auto; justify-content: space-evenly;">
+    <div>
+        <DxPieChart Data="@Data"
+                    T="CustomersChartPoint">
+            <DxPieChartSeries T="CustomersChartPoint"
+                              TArgument="string"
+                              TValue="double"
+                              ValueField="si => si.Sales"
+                              ArgumentField="si => si.Name"
+                              SummaryMethod="Enumerable.Sum"
+                              Name="Total Cost">
+                <DxChartSeriesLabel Visible="true"
+                                    FormatPattern="{value}$"
+                                    Position="RelativePosition.Inside" />
+            </DxPieChartSeries>
+            <DxChartTitle Text="Total Sales" />
+            <DxChartLegend HorizontalAlignment="HorizontalAlignment.Center"
+                           Orientation="Orientation.Horizontal"
+                           Position="RelativePosition.Outside"
+                           Visible="true" />
+        </DxPieChart>
+    </div>
+    <div>
+        <DxPieChart Data="@Data"
+                    T="CustomersChartPoint">
+            <DxPieChartSeries T="CustomersChartPoint"
+                              TArgument="string"
+                              TValue="int"
+                              ValueField="si => si.Orders"
+                              ArgumentField="si => si.Name"
+                              SummaryMethod="Enumerable.Sum"
+                              Name="Orders Count">
+                <DxChartSeriesLabel Visible="true"
+                                    Position="RelativePosition.Inside" />
+            </DxPieChartSeries>
+            <DxChartTitle Text="Orders Count" />
+            <DxChartLegend HorizontalAlignment="HorizontalAlignment.Center"
+                           Orientation="Orientation.Horizontal"
+                           Position="RelativePosition.Outside"
+                           Visible="true" />
+        </DxPieChart>
+    </div>
+</div>
+
+
+@code {
+    List<CustomersChartPoint>? Data;
+
+    protected override Task OnInitializedAsync()
+    {
+        Data = dataService.GetCustomersChartData();
+        return base.OnInitializedAsync();
+    }
+}

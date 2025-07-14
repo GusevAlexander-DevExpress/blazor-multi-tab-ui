@@ -1,0 +1,24 @@
+﻿@using blazor_multi_tab_ui.Models
+@using blazor_multi_tab_ui.Services
+@inject DataService dataService
+
+<DxGrid Data="Data">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(OrderModel.Description)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(OrderModel.CreatedDate)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(OrderModel.Cost)"></DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+@code {
+    [Parameter]
+    public int CustomerId { get; set; }
+
+    List<OrderModel>? Data;
+
+    protected override Task OnInitializedAsync()
+    {
+        Data = dataService.GetOrdersByCustomerId(CustomerId);
+        return base.OnInitializedAsync();
+    }
+}

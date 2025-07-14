@@ -1,0 +1,36 @@
+﻿@using blazor_multi_tab_ui.Models
+@using blazor_multi_tab_ui.Services
+@inject DataService dataService
+@inject MdiStateService stateService
+
+<DxGrid Data="Data">
+    <Columns>
+        <DxGridDataColumn FieldName="@nameof(CustomerModel.Name)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="@nameof(CustomerModel.TotalOrders)"></DxGridDataColumn>
+        <DxGridDataColumn FieldName="ShowOrders">
+            <CellDisplayTemplate>
+                <DxButton Text="Show Orders in new Tab" RenderStyleMode="ButtonRenderStyleMode.Text"
+                    Click="@(()=> { OpenOrders((CustomerModel)context.DataItem); })"></DxButton>
+            </CellDisplayTemplate>
+        </DxGridDataColumn>
+    </Columns>
+</DxGrid>
+
+@code {
+    List<CustomerModel>? Data;
+
+    async void OpenOrders(CustomerModel customer)
+    {
+        var Parameters = new Dictionary<string, object>
+        {
+            { "CustomerId", customer.Id },    
+        };
+        await stateService.AddTab($"{customer.Name} Orders", nameof(Orders), Parameters); 
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        Data = dataService.GetCustomers();
+        return base.OnInitializedAsync();
+    }
+}
