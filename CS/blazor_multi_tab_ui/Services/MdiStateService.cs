@@ -9,7 +9,6 @@ namespace blazor_multi_tab_ui.Services
     public class MdiStateService(IJSRuntime _js)
     {
         private MdiStateModel state = new();
-        //private List<MdiTabModel> tabs;
         private const string LOCAL_STORAGE_KEY = "MDI-Layout";
         private readonly Dictionary<string, Type> _stringToTypeMap = new(StringComparer.OrdinalIgnoreCase)
         {

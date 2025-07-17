@@ -10,8 +10,7 @@
         var tabsCollection = tabsState.Tabs;
         var activeTabIndex = tabsState.ActiveTabIndex;
 
-            <DxTabs @ref="tabsRef"
-                    ActiveTabIndex=activeTabIndex
+            <DxTabs ActiveTabIndex=activeTabIndex
                     ActiveTabIndexChanged="OnActiveTabIndexChanged"
                     AllowTabReorder="true"
                     TabReordering="OnTabReordering"
@@ -52,7 +51,6 @@
 }
 
 @code {
-    DxTabs? tabsRef;
     TabsContextMenu? contextMenu;
     MdiStateModel? tabsState;
     string TabCssClass = "tab-with-context-menu";

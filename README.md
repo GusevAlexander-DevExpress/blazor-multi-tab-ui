@@ -6,7 +6,8 @@
 <!-- default badges end -->
 # Blazor Tabs - Create a Dynamic Tabbed Interface
 
-The example creates an interactive, multi-tab web interface using DevExpress Blazor [Tabs](https://docs.devexpress.com/Blazor/405074/components/layout/tabs) and [Context Menu](https://docs.devexpress.com/Blazor/405060/components/navigation-controls/context-menu) components.
+The example creates an interactive, multi-tab web interface using DevExpress Blazor [Tabs](https://docs.devexpress.com/Blazor/405074/components/layout/tabs), [Context Menu](https://docs.devexpress.com/Blazor/405060/components/navigation-controls/context-menu) components.
+
 
 ![Multi-Tab UI](images/blazor-tabbed-ui.png)
 
@@ -16,71 +17,108 @@ It illustrates how end users can create personalized workspaces and multitask ef
 
 ### Organize Content Into Tabs
 
-Place [DxTabs](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTabs) container on the page ([Index.razor](CS/DxBlazorApplication1/Components/Pages/Index.razor)) and add a [DxTabPage](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTabPage) for each tab.
+The [MdiTabs](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor) component is based on [DxTabs](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTabs) control. 
+Obtain the tabs state and render tabs in a loop. Use [DxTabPage](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTabPage) for each tab. Insert your custom Blazor components or content directly into each `DxTabPage`.
 
-Insert your custom Blazor components or content directly into each `DxTabPage`.
+In this example the tab content is rendered dynamically: [DynamicComponent](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.dynamiccomponent?view=aspnetcore-9.0)
 
 ```razor
-<DxTabs @ref=tabs
-        @bind-ActiveTabIndex=activeTabIndex
+<DxTabs ActiveTabIndex=activeTabIndex
+        ActiveTabIndexChanged="OnActiveTabIndexChanged"
         AllowTabReorder="true"
         TabReordering="OnTabReordering"
         TabClosing="OnTabClosing"
-        RenderMode="TabsRenderMode.AllTabs">
-    <DxTabPage CssClass="counter-tab"
-               AllowClose="true"
-               VisibleIndex="@collection.GetVisibleIndexByTabText("Counter")"
-               Visible="@collection.GetVisibleByTabText("Counter")"
-               Text="Counter">
-        <div class="tab-body">
-            <Counter />
-        </div>
-    </DxTabPage>
-```
+        RenderMode="TabsRenderMode.Default">
+    @for (int i = 0; i < tabsCollection.Count; i++)
+    {
+        var tabModel = tabsCollection[i];
+        <DxTabPage  AllowClose="true"
+                    CssClass="@TabCssClass"
+                    VisibleIndex="@tabModel.VisibleIndex"
+                    Visible="@tabModel.Visible"
+                    Text="@tabModel.Text">
+            <ChildContent>
+                @if (stateService.TryGetType(tabModel.TabTypeName, out var type))
+                {
+                    <DynamicComponent @key="@tabModel.Id" Type="type" Parameters="tabModel.Parameters" />
+                }
+                else
+                {
+                    <DynamicComponent @key="@tabModel.Id" Type="@typeof(Unknown)" />
+                }
 
-The `CssClass` property of a tab page serves as a unique identifier, allowing client-side scripts to interact with specific tabs.
+            </ChildContent>
+        </DxTabPage>
+    }
+</DxTabs>
+```
 
 ### Persist Tab State
 
-Implement a custom `MDITab` class ([MDITab.cs](CS/DxBlazorApplication1/Components/MDI/MDITab.cs)) to encapsulate properties associated with each individual tab. `MDITabCollection` class ([MDITabCollection.cs](CS/DxBlazorApplication1/Components/MDI/MDITabCollection.cs)) will control visibility, display order, and titles used for all tabs. The title links an underlying object to the visual tab representation in the UI.
+Implement a custom `MdiTabModel` class ([MdiTabModel.cs](CS/blazor_multi_tab_ui/Models/MdiTabModel.cs)) to encapsulate properties associated with each individual tab. The `MdiStateModel` class ([MdiStateModel.cs](CS/blazor_multi_tab_ui/Models/MdiStateModel.cs)) represents the overall state of the [MdiTabs](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor) component — including visibility, display order, active tab index, and other properties of all tabs. The `VisibleIndex` property links an underlying object to its visual tab representation in the UI.
 
-Bind these properties to the visual tab elements in the UI. To ensure the `MDITabCollection` accurately reflects the live interface, implement event handlers for `TabReorder` and `TabClosing`. These handlers will listen for user actions and dynamically update the collection to match current tab state.
+Bind these properties to the visual tab elements in the UI. To ensure that the state model accurately reflects the live interface, implement event handlers for `TabReorder`, `TabClosing`, and `ActiveTabIndexChanged`. These handlers listen for user actions and dynamically update the state to match the current tab layout.
 
-To maintain tab layout across sessions, serialize the collection to JSON and save it to the browser's local storage with `MDIStateHelper` class ([MDIStateHelper.cs](CS/DxBlazorApplication1/Components/MDI/MDIStateHelper.cs)) every time the UI layout changes. This will maintain tab visibility and order even after the user closes and reopens the browser. Tab state is restored in the `OnAfterRenderAsync` event handler.
+The [MdiStateService](CS/blazor_multi_tab_ui/Services/MdiStateService.cs) service contains all methods required for managing state — including loading, saving, and updating properties. To maintain the tab layout across sessions, the state can be stored in local storage, session storage, cookies, or a database. In this example, `MdiStateService` stores the state in local storage. The service serializes the entire `MdiStateModel` to JSON and saves it to the browser's local storage whenever the UI layout changes. This preserves tab visibility, order, and the active tab even after the browser is closed and reopened. Tab state is restored in the `OnInitializedAsync` method of the `MdiTabs` component.
 
 ### Add Context Menu to Tabs
 
-Create a context menu that allows users to manage tabs as needed:
+Add a context menu that lets users manage tabs more flexibly. The available operations are:
 
-- Close the current tab.
-- Close all tabs.
-- Close all tabs except for the current tab.
-- Restore closed tabs.
+- **Close** the current tab.
+- **Close** all tabs.
+- **Close** all tabs except the current one.
+- **Hide** the current tab.
+- **Hide** all tabs.
+- **Hide** all tabs except the current one.
+- **Restore** previously hidden tabs.
 
-Place [DxContextMenu](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxContextMenu) on the page ([Index.razor](CS/DxBlazorApplication1/Components/Pages/Index.razor)) and add a [DxContextMenuItem](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxContextMenuItem) for each menu action.
+Embed the [`TabsContextMenu`](CS/blazor_multi_tab_ui/Components/MDI/TabsContextMenu.razor) component inside [`MdiTabs`](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor).  
+`TabsContextMenu` renders a [DxContextMenu](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxContextMenu) with one [DxContextMenuItem](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxContextMenuItem) per action:
 
 ```razor
-<DxContextMenu @ref=menu>
+<DxContextMenu @ref="menu">
     <Items>
-        <DxContextMenuItem Click="CloseTab" Text="Close"></DxContextMenuItem>
-        <DxContextMenuItem Click="CloseAllTabs" Text="Close All Tabs"></DxContextMenuItem>
-        <DxContextMenuItem Click="CloseOtherTabs" Text="Close Other Tabs"></DxContextMenuItem>
-        <DxContextMenuItem Click="RestoreAllTabs" Text="Restore Closed Tabs"></DxContextMenuItem>
+        <DxContextMenuItem Text="Hide">
+            <Items>
+                <DxContextMenuItem Click="HideTab"       Text="This"       />
+                <DxContextMenuItem Click="HideAllTabs"   Text="All Tabs"   />
+                <DxContextMenuItem Click="HideOtherTabs" Text="Other Tabs" />
+            </Items>
+        </DxContextMenuItem>
+
+        <DxContextMenuItem Click="RestoreHiddenTabs" Text="Restore Hidden Tabs" />
+
+        <DxContextMenuItem Text="Close">
+            <Items>
+                <DxContextMenuItem Click="CloseTab"       Text="This"       />
+                <DxContextMenuItem Click="CloseAllTabs"   Text="All Tabs"   />
+                <DxContextMenuItem Click="CloseOtherTabs" Text="Other Tabs" />
+            </Items>
+        </DxContextMenuItem>
     </Items>
 </DxContextMenu>
 ```
 
-Implement a client-side script ([mdi.js](CS/DxBlazorApplication1/wwwroot/js/mdi.js)) to handle right-clicks on specific tabs (identified by their `CssClass` property). This script should prevent the default browser context menu. Capture the mouse position, and invoke a .NET `[JSInvokable]` method.
+Use the `TabSelector` parameter to find the `MdiTabs` elemnt and its tab-header elements to target.  
+At runtime, the companion script [`TabsContextMenu.razor.js`](CS/blazor_multi_tab_ui/Components/MDI/TabsContextMenu.razor.js) performs the following:
+
+- Finds the matching elements via the selector.
+- Suppresses the browser’s default context menu.
+- Captures the mouse position and invokes a `[JSInvokable]` .NET method that opens the DevExpress menu at the pointer location.
+
+When a menu item is clicked, the handler calls the corresponding method of [`MdiStateService`](CS/blazor_multi_tab_ui/Services/MdiStateService.cs) to update the tab state (close, hide, or restore) and persist the change if required.
+
 
 ## Files to Review
 
-- [Index.razor](CS/DxBlazorApplication1/Components/Pages/Index.razor)
-- [NavMenu.razor](CS/DxBlazorApplication1/Components/Layout/NavMenu.razor)
-- [MainLayout.razor](CS/DxBlazorApplication1/Components/Layout/MainLayout.razor.css)
-- [MDITab.cs](CS/DxBlazorApplication1/Components/MDI/MDITab.cs)
-- [MDITabCollection.cs](CS/DxBlazorApplication1/Components/MDI/MDITabCollection.cs)
-- [MDIStateHelper.cs](CS/DxBlazorApplication1/Components/MDI/MDIStateHelper.cs)
-- [mdi.js](CS/DxBlazorApplication1/wwwroot/js/mdi.js)
+- [`MdiTabs.razor`](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor) – main tabbed UI component
+- [`MdiTabModel.cs`](CS/blazor_multi_tab_ui/Models/MdiTabModel.cs) – defines individual tab structure
+- [`MdiStateModel.cs`](CS/blazor_multi_tab_ui/Models/MdiStateModel.cs) – represents the overall state of all tabs
+- [`MdiStateService.cs`](CS/blazor_multi_tab_ui/Services/MdiStateService.cs) – manages tab state, persistence, and updates
+- [`TabsContextMenu.razor`](CS/blazor_multi_tab_ui/Components/MDI/TabsContextMenu.razor) – context menu UI and logic
+- [`TabsContextMenu.razor.js`](CS/blazor_multi_tab_ui/Components/MDI/TabsContextMenu.razor.js) – JS interop for right-click and menu activation
+- [`Tabs`](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor/Tabs) – folder with tab content components (one per tab type)
 
 ## Documentation
 

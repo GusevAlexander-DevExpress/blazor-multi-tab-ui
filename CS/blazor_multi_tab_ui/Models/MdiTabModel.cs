@@ -11,7 +11,7 @@ namespace blazor_multi_tab_ui.Models
         public bool Visible { get; set; }
         public string? Text { get; set; }
         public string? TabTypeName { get; set; }
-        public Dictionary<string, JsonElement>? ParsedParameters { get; set; }
+        public Dictionary<string, JsonElement>? UntypedParameters { get; set; }
         private Dictionary<string, object>? _cachedParameters;
 
         [JsonIgnore]
@@ -19,9 +19,9 @@ namespace blazor_multi_tab_ui.Models
         {
             get
             {
-                if (_cachedParameters == null && ParsedParameters != null)
+                if (_cachedParameters == null && UntypedParameters != null)
                 {
-                    _cachedParameters = ParsedParameters.ToDictionary(
+                    _cachedParameters = UntypedParameters.ToDictionary(
                         p => p.Key,
                         p => (object)(p.Value.ValueKind switch
                         {
@@ -39,7 +39,7 @@ namespace blazor_multi_tab_ui.Models
             }
             set
             {
-                ParsedParameters = value?.ToDictionary(
+                UntypedParameters = value?.ToDictionary(
                     p => p.Key,
                     p => JsonSerializer.SerializeToElement(p.Value)
                 );
