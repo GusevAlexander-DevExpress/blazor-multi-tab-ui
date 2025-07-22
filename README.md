@@ -14,7 +14,7 @@ It illustrates how end users can create personalized workspaces and multitask ef
 
 ## Implementation Details
 
-### Organize Content Into Tabs
+### Organize Content into Tabs
 
 The [MdiTabs](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor) custom component is based on [DxTabs](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTabs) control.
 
