@@ -16,7 +16,7 @@ It illustrates how end users can create personalized workspaces and multitask ef
 
 ### Organize Content into Tabs
 
-The [MdiTabs](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor) custom component is based on [DxTabs](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTabs) control.
+The [MdiTabs](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor) custom component is based on the [DxTabs](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTabs) control.
 
 Tabs are iteratively rendered from a persisted state collection (see details below). The content within each tab is loaded dynamically using a [DynamicComponent](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.dynamiccomponent). This approach allows for the flexible rendering of different components within the tabs without the need to hardcode them.
 
