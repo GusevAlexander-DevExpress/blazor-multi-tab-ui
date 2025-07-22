@@ -6,11 +6,9 @@
 <!-- default badges end -->
 # Blazor Tabs - Create a Dynamic Tabbed Interface
 
-The example creates an interactive, multi-tab web interface using DevExpress Blazor [Tabs](https://docs.devexpress.com/Blazor/405074/components/layout/tabs) and [Context Menu](https://docs.devexpress.com/Blazor/405060/components/navigation-controls/context-menu) components.
+This example creates an interactive, multi-tab web interface using DevExpress Blazor [Tabs](https://docs.devexpress.com/Blazor/405074/components/layout/tabs) and [Context Menu](https://docs.devexpress.com/Blazor/405060/components/navigation-controls/context-menu) components. It illustrates how end users can create personalized workspaces and multitask effectively.
 
 ![Multi-Tab UI](images/blazor-tabbed-ui.png)
-
-It illustrates how end users can create personalized workspaces and multitask effectively.
 
 ## Implementation Details
 
@@ -18,7 +16,7 @@ It illustrates how end users can create personalized workspaces and multitask ef
 
 The [MdiTabs](CS/blazor_multi_tab_ui/Components/MDI/MdiTabs.razor) custom component is based on the [DxTabs](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxTabs) control.
 
-Tabs are iteratively rendered from a persisted state collection (see details below). The content within each tab is loaded dynamically using a [DynamicComponent](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.dynamiccomponent). This approach allows for the flexible rendering of different components within the tabs without the need to hardcode them.
+Tabs are rendered by iterating over a persisted state collection (see details below). The content within each tab is loaded dynamically using a [DynamicComponent](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.components.dynamiccomponent). This approach allows for the flexible rendering of different components within the tabs without the need to hardcode them.
 
 ```razor
 <DxTabs ActiveTabIndex=activeTabIndex
