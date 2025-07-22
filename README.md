@@ -73,7 +73,7 @@ Implement a context menu that allows users to manage tabs as needed:
 - **Hide** all tabs except for the current one.
 - **Restore** hidden tabs.
 
-Create a custom [`TabsContextMenu`](CS/blazor_multi_tab_ui/Components/MDI/TabsContextMenu.razor) component which contains [DxContextMenu](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxContextMenu) and all related actions. Place it inside the `MdiTabs` component.
+Create a custom [`TabsContextMenu`](CS/blazor_multi_tab_ui/Components/MDI/TabsContextMenu.razor) component that contains [DxContextMenu](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxContextMenu) and all related actions. Place it inside the `MdiTabs` component.
 
 ```razor
 <TabsContextMenu @ref="contextMenu" TabSelector=@($".{TabCssClass}") />
