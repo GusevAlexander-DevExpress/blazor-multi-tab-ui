@@ -85,7 +85,7 @@ Implement a client-side script [`TabsContextMenu.razor.js`](CS/blazor_multi_tab_
 
 - Finds the matching elements by their `CssClass` property.
 - Suppresses the default browser context menu.
-- Capture the mouse position, and invoke a .NET `[JSInvokable]` method that opens the context menu at the pointer's coordinates.
+- Captures the mouse position and invokes a .NET `[JSInvokable]` method that opens the context menu at the pointer's coordinates.
 
 When a menu item is clicked, the handler calls the corresponding method of [`MdiStateService`](CS/blazor_multi_tab_ui/Services/MdiStateService.cs) to update the tab state (close, hide, or restore).
 
