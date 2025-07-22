@@ -83,7 +83,7 @@ Use the `TabSelector` parameter to associate the specific tab with the context m
 
 Implement a client-side script [`TabsContextMenu.razor.js`](CS/blazor_multi_tab_ui/Components/MDI/TabsContextMenu.razor.js) that handles right-clicks on tabs and performs the following actions:
 
-- Find the matching elements by their `CssClass` property.
+- Finds the matching elements by their `CssClass` property.
 - Suppress the default browser context menu.
 - Capture the mouse position, and invoke a .NET `[JSInvokable]` method that opens the context menu at the pointer's coordinates.
 
