@@ -26,7 +26,7 @@ Tabs are iteratively rendered from a persisted state collection (see details bel
         AllowTabReorder="true"
         TabReordering="OnTabReordering"
         TabClosing="OnTabClosing"
-        RenderMode="TabsRenderMode.Default">
+        RenderMode="TabsRenderMode.OnDemand">
     @for (int i = 0; i < tabsCollection.Count; i++)
     {
         var tabModel = tabsCollection[i];
