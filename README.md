@@ -57,7 +57,7 @@ The state of the multi-tab interface is managed by the following classes:
 
 - `MdiTabModel` ([MdiTabModel.cs](CS/blazor_multi_tab_ui/Models/MdiTabModel.cs)) encapsulates properties associated with each individual tab: unique identifier, visibility, title, and so on.
 - `MdiStateModel` ([MdiStateModel.cs](CS/blazor_multi_tab_ui/Models/MdiStateModel.cs)) contains the list of all tabs (`MdiTabModel`) and the index of the active tab.
-- `MdiStateService` ([MdiStateService.cs](CS/blazor_multi_tab_ui/Services/MdiStateService.cs)) exposes methods for tab state management and maintains tab layout across sessions even after the user closes and reopens the browser. It serializes `MdiStateModel` to JSON and saves it to the browser's local storage every time the UI layout changes. Tab state is restored in the `OnInitializedAsync` method of the `MdiTabs` component.
+- `MdiStateService` ([MdiStateService.cs](CS/blazor_multi_tab_ui/Services/MdiStateService.cs)) exposes methods for tab state management and maintains tab layout across sessions even after the user closes and reopens the browser. It serializes `MdiStateModel` to JSON and saves it to the browser's local storage every time the UI layout changes. The tab state is restored in the `MdiTabs` component's `OnInitializedAsync` method.
 
 To ensure the state model (`MdiStateModel`) accurately reflects the live interface, implement event handlers for `TabReorder`, `TabClosing`, and `ActiveTabIndexChanged`. These handlers will listen for user actions and dynamically update the state to match the current tab layout.
 
