@@ -1,0 +1,104 @@
+﻿@using blazor_multi_tab_ui.Services
+@inject IJSRuntime JS
+@inject MdiStateService stateService;
+
+<DxContextMenu @ref=menu>
+    <Items>
+        <DxContextMenuItem Text="Hide">
+            <Items>
+                <DxContextMenuItem Click="HideTab" Text="This Tab"></DxContextMenuItem>
+                <DxContextMenuItem Click="HideAllTabs" Text="All Tabs"></DxContextMenuItem>
+                <DxContextMenuItem Click="HideOtherTabs" Text="Other Tabs"></DxContextMenuItem>
+            </Items>
+        </DxContextMenuItem>
+
+        <DxContextMenuItem Click="RestoreHiddenTabs" Text="Restore Hidden Tabs"></DxContextMenuItem>
+
+        <DxContextMenuItem Text="Close">
+            <Items>
+                <DxContextMenuItem Click="CloseTab" Text="This Tab"></DxContextMenuItem>
+                <DxContextMenuItem Click="CloseAllTabs" Text="All Tabs"></DxContextMenuItem>
+                <DxContextMenuItem Click="CloseOtherTabs" Text="Other Tabs"></DxContextMenuItem>
+            </Items>
+        </DxContextMenuItem>
+
+    </Items>
+</DxContextMenu>
+
+@code {
+    private DxContextMenu? menu;
+    private IJSObjectReference? module;
+    private int? targetTabVisibleIndex;
+
+    [Parameter]
+    public string? TabSelector { get; set; }
+
+    public async Task AddContextMenuHandler()
+    {
+        if (module is null) return;
+        await module.InvokeVoidAsync(
+            "addContextMenuHandler",
+            TabSelector,
+            DotNetObjectReference.Create(this));
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) module = await JS.InvokeAsync<IJSObjectReference>(
+            "import", "./Components/MDI/TabsContextMenu.razor.js");
+
+        await AddContextMenuHandler();
+
+        await base.OnAfterRenderAsync(firstRender);    
+    }
+
+    [JSInvokable]
+    public async Task ShowContextMenu(MouseEventArgs e, int tabVisibleIndex)
+    {
+        targetTabVisibleIndex = tabVisibleIndex;
+        if (menu != null)
+        {
+            await menu.ShowAsync(e);
+        }
+    }
+
+    private void HideTab()
+    {
+        if (targetTabVisibleIndex is not null) 
+            stateService.SetTabVisible((int)targetTabVisibleIndex, false);
+    }
+
+    private async Task HideAllTabs()
+    {
+        await stateService.SetAllTabsVisible(false);
+    }
+
+    private async Task HideOtherTabs()
+    {
+        if (targetTabVisibleIndex is null) return;
+        await stateService.SetAllTabsVisible(false);
+        stateService.SetTabVisible((int)targetTabVisibleIndex, true);
+    }
+
+    private async Task RestoreHiddenTabs()
+    {
+        await stateService.SetAllTabsVisible(true);
+    }
+
+    private async Task CloseTab()
+    {
+        if (targetTabVisibleIndex is not null)
+            await stateService.RemoveTab((int)targetTabVisibleIndex);
+    }
+
+    private async Task CloseAllTabs()
+    {
+        await stateService.RemoveAllTabs();
+    }
+    private async Task CloseOtherTabs()
+    {
+        if (targetTabVisibleIndex is not null)
+            await stateService.RemoveAllButTab((int)targetTabVisibleIndex);
+    }
+    
+}
